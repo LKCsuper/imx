@@ -1,5 +1,7 @@
-CONFIG_SYS_EXTRA_OPTIONS="IMX_CONFIG=board/freescale/mx6ullevk/imximage.cfg,MX6ULL_EVK_EMMC_REWORK"
+# 这里修改的缘由,配置文件意义
+CONFIG_SYS_EXTRA_OPTIONS="IMX_CONFIG=board/freescale/mx6ull_alientek_ emmc/imximage.cfg,MX6ULL_EVK_EMMC_REWORK"
 CONFIG_ARM=y
 CONFIG_ARCH_MX6=y
-CONFIG_TARGET_MX6ULL_14X14_EVK=y
+# MY_IMX 为防止头文件包含,预定义
+CONFIG_TARGET_MY_IMX=y
 CONFIG_CMD_GPIO=y
