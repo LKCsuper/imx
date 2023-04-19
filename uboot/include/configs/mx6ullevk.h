@@ -32,38 +32,50 @@
 #define PHYS_SDRAM_SIZE		SZ_256M
 #define CONFIG_BOOTARGS_CMA_SIZE   "cma=96M "
 #else
+/* 整个板子dram的大小 */
 #define PHYS_SDRAM_SIZE		SZ_512M
+/* 连续内存大小,因为有些特殊场景需要 */
 #define CONFIG_BOOTARGS_CMA_SIZE   ""
 /* DCDC used on 14x14 EVK, no PMIC */
 #undef CONFIG_LDO_BYPASS_CHECK
 #endif
 
-/* SPL options */
+/* SPL options SPL选项 */
 /* We default not support SPL
  * #define CONFIG_SPL_LIBCOMMON_SUPPORT
  * #define CONFIG_SPL_MMC_SUPPORT
  * #include "imx6_spl.h"
 */
 
+/* 设置uboot 环境变量,看上去像是板级名 */
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 
+/* 显示cpu信息 */
 #define CONFIG_DISPLAY_CPUINFO
+/* 显示 */
 #define CONFIG_DISPLAY_BOARDINFO
 
 /* Size of malloc() pool */
+/* uboot malloc 申请内存的大小 */
 #define CONFIG_SYS_MALLOC_LEN		(16 * SZ_1M)
 
+/* 板级初始化 board_early_init_f */
 #define CONFIG_BOARD_EARLY_INIT_F
+/* board_late_init */
 #define CONFIG_BOARD_LATE_INIT
 
 #define CONFIG_MXC_UART
+/* 串口基地址 */
 #define CONFIG_MXC_UART_BASE		UART1_BASE
 
 /* MMC Configs */
+/* USDHC 设备 EMMC SD*/
 #ifdef CONFIG_FSL_USDHC
+/* EMMC 所使用接口的寄存器基地址，也就是 USDHC2 的基地址 */
 #define CONFIG_SYS_FSL_ESDHC_ADDR	USDHC2_BASE_ADDR
 
-/* NAND pin conflicts with usdhc2 */
+/* NAND pin conflicts with usdhc2 这里意味着nand和emmc的引脚是冲突的 */
+/* 是否使用nand ,如果是nand就只有sd卡一个usdhc */
 #ifdef CONFIG_SYS_USE_NAND
 #define CONFIG_SYS_FSL_USDHC_NUM	1
 #else
@@ -72,6 +84,7 @@
 #endif
 
 /* I2C configs */
+/* I2C 配置,这里不知道什么意义 */
 #define CONFIG_CMD_I2C
 #ifdef CONFIG_CMD_I2C
 #define CONFIG_SYS_I2C
@@ -87,6 +100,7 @@
 #define CONFIG_POWER_PFUZE3000_I2C_ADDR  0x08
 #endif
 
+/* 加载区域 */
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #ifdef CONFIG_SYS_USE_NAND
@@ -95,6 +109,7 @@
 #define CONFIG_MFG_NAND_PARTITION ""
 #endif
 
+/* 环境设置 */
 #define CONFIG_MFG_ENV_SETTINGS \
 	"mfgtool_args=setenv bootargs console=${console},${baudrate} " \
 	    CONFIG_BOOTARGS_CMA_SIZE \
@@ -110,6 +125,7 @@
 	"initrd_high=0xffffffff\0" \
 	"bootcmd_mfg=run mfgtool_args;bootz ${loadaddr} ${initrd_addr} ${fdt_addr};\0" \
 
+/* nand启动方式 */
 #if defined(CONFIG_SYS_USE_NAND) && !defined(CONFIG_SYS_BOOT_SD)
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	CONFIG_MFG_ENV_SETTINGS \
@@ -131,6 +147,8 @@
 		"bootz ${loadaddr} - ${fdt_addr}\0"
 
 #else
+
+/* 额外的环境设置 */
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	CONFIG_MFG_ENV_SETTINGS \
 	"script=boot.scr\0" \
