@@ -84,7 +84,7 @@
 #endif
 
 /* I2C configs */
-/* I2C 配置,这里不知道什么意义 */
+
 #define CONFIG_CMD_I2C
 #ifdef CONFIG_CMD_I2C
 #define CONFIG_SYS_I2C

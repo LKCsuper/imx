@@ -57,9 +57,9 @@
 /* uboot malloc 申请内存的大小 */
 #define CONFIG_SYS_MALLOC_LEN		(16 * SZ_1M)
 
-/* 板级初始化 board_early_init_f */
+/* board_init_f函数就会调用 板级初始化 board_early_init_f */
 #define CONFIG_BOARD_EARLY_INIT_F
-/* board_late_init */
+/* board_init_r函数就会调用 board_late_init */
 #define CONFIG_BOARD_LATE_INIT
 
 #define CONFIG_MXC_UART
@@ -102,6 +102,7 @@
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #ifdef CONFIG_SYS_USE_NAND
+/* nand 分区 */
 #define CONFIG_MFG_NAND_PARTITION "mtdparts=gpmi-nand:4m(u-boot),128k(env),1m(logo),1m(dtb),8m(kernel),-(rootfs) "
 #else
 #define CONFIG_MFG_NAND_PARTITION ""
@@ -242,23 +243,36 @@
 #endif
 
 /* Miscellaneous configurable options */
+
+/*，设置 memtest测试 的内存起始地址和内存大小。0x8000000 128M */
 #define CONFIG_CMD_MEMTEST
 #define CONFIG_SYS_MEMTEST_START	0x80000000
 #define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_MEMTEST_START + 0x8000000)
 
+/* 0x12000000 linux 内核dram 加载存储开始的地址 */
 #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
+/* 系统时钟运行频率 1000Hz */
 #define CONFIG_SYS_HZ			1000
 
+/* 栈大小 */
 #define CONFIG_STACKSIZE		SZ_128K
 
 /* Physical Memory Map */
+/* dram band 这里应该和片内flash差不多 */
 #define CONFIG_NR_DRAM_BANKS		1
+/* DRAM控制器 MMDC0所管辖的 DRAM范围 起始 地址，也就是 0X80000000*/
 #define PHYS_SDRAM			MMDC0_ARB_BASE_ADDR
 
+/* DRAM 起始地址 */
 #define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM
+/* 内部 IRAM的起始地址 (也就是 OCRAM的起始地址 )，为 0X00900000
+IRAM 是指集成到soc上的ram,而dram必须经过软件初始化才能使用
+*/
 #define CONFIG_SYS_INIT_RAM_ADDR	IRAM_BASE_ADDR
+/* 128KB */
 #define CONFIG_SYS_INIT_RAM_SIZE	IRAM_SIZE
 
+/* SP 偏移和地址 */
 #define CONFIG_SYS_INIT_SP_OFFSET \
 	(CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
 #define CONFIG_SYS_INIT_SP_ADDR \
@@ -279,8 +293,15 @@
 #define CONFIG_ENV_IS_IN_MMC
 #endif
 
+/* 默认emmc */
 #define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 */
+/* 默认分区,这里为0 */
 #define CONFIG_SYS_MMC_ENV_PART		0	/* user area */
+/*
+系统的根文件系统所在的分区，这里设置为 "/dev/mmcblk1p2"，
+也就是 EMMC设备的第 2个分区。第 0个分区保存 uboot，第 1个分
+区保存 linux镜像和设备树，第 2个分区为 Linux系统的根文件系 统。
+*/
 #define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
 
 #define CONFIG_CMD_BMODE
@@ -289,6 +310,7 @@
 #define CONFIG_QSPI_BASE		QSPI0_BASE_ADDR
 #define CONFIG_QSPI_MEMMAP_BASE		QSPI0_AMBA_BASE
 
+/* SPI flash 配置 */
 #define CONFIG_CMD_SF
 #define CONFIG_SPI_FLASH
 #define CONFIG_SPI_FLASH_BAR
@@ -316,9 +338,14 @@
 #define CONFIG_APBH_DMA_BURST8
 #endif
 
+/* 环境变量大小 */
 #define CONFIG_ENV_SIZE			SZ_8K
+
+/* 环境变量在mmc */
 #if defined(CONFIG_ENV_IS_IN_MMC)
+/* 环境变量偏移,第一个应该是sd以及emmc */
 #define CONFIG_ENV_OFFSET		(12 * SZ_64K)
+
 #elif defined(CONFIG_ENV_IS_IN_SPI_FLASH)
 #define CONFIG_ENV_OFFSET		(768 * 1024)
 #define CONFIG_ENV_SECT_SIZE		(64 * 1024)
@@ -335,6 +362,7 @@
 
 
 /* USB Configs */
+/* USB 的配置 */
 #define CONFIG_CMD_USB
 #ifdef CONFIG_CMD_USB
 #define CONFIG_USB_EHCI
@@ -378,6 +406,7 @@
 
 #define CONFIG_IMX_THERMAL
 
+/* 开启lcd等开机显示 */
 /*#ifndef CONFIG_SPL_BUILD
 #define CONFIG_VIDEO*/
 #ifdef CONFIG_VIDEO
