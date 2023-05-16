@@ -405,7 +405,6 @@
 #define MX6SX_WDOG3_BASE_ADDR       (AIPS3_ARB_BASE_ADDR + 0x88000)
 #define MX6SX_UART6_BASE_ADDR             (AIPS3_ARB_BASE_ADDR + 0xA0000)
 
-/* ram大小 */
 #if !(defined(CONFIG_MX6SX) || defined(CONFIG_MX6UL) || \
 	defined(CONFIG_MX6SLL) || defined(CONFIG_MX6SL))
 #define IRAM_SIZE                    0x00040000

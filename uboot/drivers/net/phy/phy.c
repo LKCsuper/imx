@@ -221,19 +221,7 @@ int genphy_config_aneg(struct phy_device *phydev)
 int genphy_update_link(struct phy_device *phydev)
 {
 	unsigned int mii_reg;
-#ifdef CONFIG_PHY_SMSC
-        static int lan8720_flag = 0;
-        int bmcr_reg = 0;
 
-        if(lan8720_flag == 0)
-        {
-                bmcr_reg = phy_read(phydev, MDIO_DEVAD_NONE, MII_BMCR);   /* Read the default value of BCMR register */
-                phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, BMCR_RESET); /* Software reset*/
-                mdelay(10);
-                phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, bmcr_reg);   /* Write the default value to BCMR register */
-                lan8720_flag = 1;
-        }
-#endif
 	/*
 	 * Wait if the link is up, and autonegotiation is in progress
 	 * (ie - we're capable and it's not done)
@@ -594,15 +582,11 @@ static struct phy_driver *get_phy_driver(struct phy_device *phydev,
 	struct list_head *entry;
 	int phy_id = phydev->phy_id;
 	struct phy_driver *drv = NULL;
-	char str[] = "SMSC LAN8710/LAN8720";
 
 	list_for_each(entry, &phy_drivers) {
 		drv = list_entry(entry, struct phy_driver, list);
-		if ((drv->uid & drv->mask) == (phy_id & drv->mask)) {
-			if (strcmp(drv->name, str) == 0)
-				setenv("enet1","0x2");
+		if ((drv->uid & drv->mask) == (phy_id & drv->mask))
 			return drv;
-		}
 	}
 
 	/* If we made it here, there's no driver for this PHY */

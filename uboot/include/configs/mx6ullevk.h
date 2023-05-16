@@ -32,50 +32,38 @@
 #define PHYS_SDRAM_SIZE		SZ_256M
 #define CONFIG_BOOTARGS_CMA_SIZE   "cma=96M "
 #else
-/* 整个板子dram的大小 */
 #define PHYS_SDRAM_SIZE		SZ_512M
-/* 连续内存大小,因为有些特殊场景需要 */
 #define CONFIG_BOOTARGS_CMA_SIZE   ""
 /* DCDC used on 14x14 EVK, no PMIC */
 #undef CONFIG_LDO_BYPASS_CHECK
 #endif
 
-/* SPL options SPL选项 */
+/* SPL options */
 /* We default not support SPL
  * #define CONFIG_SPL_LIBCOMMON_SUPPORT
  * #define CONFIG_SPL_MMC_SUPPORT
  * #include "imx6_spl.h"
 */
 
-/* 设置uboot 环境变量,看上去像是板级名 */
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 
-/* 显示cpu信息 */
 #define CONFIG_DISPLAY_CPUINFO
-/* 显示 */
 #define CONFIG_DISPLAY_BOARDINFO
 
 /* Size of malloc() pool */
-/* uboot malloc 申请内存的大小 */
 #define CONFIG_SYS_MALLOC_LEN		(16 * SZ_1M)
 
-/* 板级初始化 board_early_init_f */
 #define CONFIG_BOARD_EARLY_INIT_F
-/* board_late_init */
 #define CONFIG_BOARD_LATE_INIT
 
 #define CONFIG_MXC_UART
-/* 串口基地址 */
 #define CONFIG_MXC_UART_BASE		UART1_BASE
 
 /* MMC Configs */
-/* USDHC 设备 EMMC SD*/
 #ifdef CONFIG_FSL_USDHC
-/* EMMC 所使用接口的寄存器基地址，也就是 USDHC2 的基地址 */
 #define CONFIG_SYS_FSL_ESDHC_ADDR	USDHC2_BASE_ADDR
 
-/* NAND pin conflicts with usdhc2 这里意味着nand和emmc的引脚是冲突的 */
-/* 是否使用nand ,如果是nand就只有sd卡一个usdhc */
+/* NAND pin conflicts with usdhc2 */
 #ifdef CONFIG_SYS_USE_NAND
 #define CONFIG_SYS_FSL_USDHC_NUM	1
 #else
@@ -84,7 +72,6 @@
 #endif
 
 /* I2C configs */
-
 #define CONFIG_CMD_I2C
 #ifdef CONFIG_CMD_I2C
 #define CONFIG_SYS_I2C
@@ -100,16 +87,14 @@
 #define CONFIG_POWER_PFUZE3000_I2C_ADDR  0x08
 #endif
 
-/* 加载区域 */
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
-#ifdef CONFIG_SYS_USE_NAND
-#define CONFIG_MFG_NAND_PARTITION "mtdparts=gpmi-nand:4m(u-boot),128k(env),1m(logo),1m(dtb),8m(kernel),-(rootfs) "
+#ifdef CONFIG_SYS_BOOT_NAND
+#define CONFIG_MFG_NAND_PARTITION "mtdparts=gpmi-nand:64m(boot),16m(kernel),16m(dtb),1m(misc),-(rootfs) "
 #else
 #define CONFIG_MFG_NAND_PARTITION ""
 #endif
 
-/* 环境设置 */
 #define CONFIG_MFG_ENV_SETTINGS \
 	"mfgtool_args=setenv bootargs console=${console},${baudrate} " \
 	    CONFIG_BOOTARGS_CMA_SIZE \
@@ -125,30 +110,22 @@
 	"initrd_high=0xffffffff\0" \
 	"bootcmd_mfg=run mfgtool_args;bootz ${loadaddr} ${initrd_addr} ${fdt_addr};\0" \
 
-/* nand启动方式 */
-#if defined(CONFIG_SYS_USE_NAND) && !defined(CONFIG_SYS_BOOT_SD)
+#if defined(CONFIG_SYS_BOOT_NAND)
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	CONFIG_MFG_ENV_SETTINGS \
 	"panel=TFT43AB\0" \
 	"fdt_addr=0x83000000\0" \
 	"fdt_high=0xffffffff\0"	  \
 	"console=ttymxc0\0" \
-	"splashimage=0x88000000\0" \
-	"splashpos=m,m\0" \
-	"logo_offset=0x420000\0" \
-	"logo_size=0x100000\0" \
-	"fdt_offset=0x520000\0" \
-	"bootargs=console=ttymxc0,115200 ubi.mtd=5 "  \
+	"bootargs=console=ttymxc0,115200 ubi.mtd=4 "  \
 		"root=ubi0:rootfs rootfstype=ubifs "		     \
 		CONFIG_BOOTARGS_CMA_SIZE \
-		"mtdparts=gpmi-nand:4m(u-boot),128k(env),1m(logo),1m(dtb),8m(kernel),-(rootfs)\0" \
-	"bootcmd=nand read ${loadaddr} 0x620000 0x800000;"\
-		"nand read ${fdt_addr} ${fdt_offset} 0x20000;"\
+		"mtdparts=gpmi-nand:64m(boot),16m(kernel),16m(dtb),1m(misc),-(rootfs)\0"\
+	"bootcmd=nand read ${loadaddr} 0x4000000 0x800000;"\
+		"nand read ${fdt_addr} 0x5000000 0x100000;"\
 		"bootz ${loadaddr} - ${fdt_addr}\0"
 
 #else
-
-/* 额外的环境设置 */
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	CONFIG_MFG_ENV_SETTINGS \
 	"script=boot.scr\0" \
@@ -161,16 +138,12 @@
 	"boot_fdt=try\0" \
 	"ip_dyn=yes\0" \
 	"panel=TFT43AB\0" \
-	"splashimage=0x88000000\0" \
-	"splashpos=m,m\0" \
-	"logo_file=alientek.bmp\0" \
 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
 	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
 	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
 	"mmcautodetect=yes\0" \
 	"mmcargs=setenv bootargs console=${console},${baudrate} " \
 		CONFIG_BOOTARGS_CMA_SIZE \
-		CONFIG_MFG_NAND_PARTITION \
 		"root=${mmcroot}\0" \
 	"loadbootscript=" \
 		"fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
@@ -272,12 +245,11 @@
 #ifdef CONFIG_SYS_BOOT_QSPI
 #define CONFIG_FSL_QSPI
 #define CONFIG_ENV_IS_IN_SPI_FLASH
-#elif defined(CONFIG_SYS_USE_NAND) && !defined(CONFIG_SYS_BOOT_SD)
+#elif defined CONFIG_SYS_BOOT_NAND
+#define CONFIG_SYS_USE_NAND
 #define CONFIG_ENV_IS_IN_NAND
 #else
-#ifndef CONFIG_SYS_BOOT_SD
 #define CONFIG_FSL_QSPI
-#endif
 #define CONFIG_ENV_IS_IN_MMC
 #endif
 
@@ -330,8 +302,8 @@
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
 #elif defined(CONFIG_ENV_IS_IN_NAND)
 #undef CONFIG_ENV_SIZE
-#define CONFIG_ENV_OFFSET		SZ_4M
-#define CONFIG_ENV_SECT_SIZE		(64 << 10)
+#define CONFIG_ENV_OFFSET		(60 << 20)
+#define CONFIG_ENV_SECT_SIZE		(128 << 10)
 #define CONFIG_ENV_SIZE			CONFIG_ENV_SECT_SIZE
 #endif
 
@@ -356,15 +328,11 @@
 #define CONFIG_CMD_MII
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
-
-#define CONFIG_OF_BOARD_SETUP
 #define CONFIG_FEC_ENET_DEV		1
 
 #if (CONFIG_FEC_ENET_DEV == 0)
 #define IMX_FEC_BASE			ENET_BASE_ADDR
 #define CONFIG_FEC_MXC_PHYADDR          0x2
-/* alientek imx6ull alpha board version <= 2.2, mini board <= 1.8, CONFIG_FEC_MXC_PHYADDR = 0x0 */
-/* #define CONFIG_FEC_MXC_PHYADDR          0x0 */
 #define CONFIG_FEC_XCV_TYPE             RMII
 #elif (CONFIG_FEC_ENET_DEV == 1)
 #define IMX_FEC_BASE			ENET2_BASE_ADDR
@@ -374,18 +342,17 @@
 #define CONFIG_ETHPRIME			"FEC"
 
 #define CONFIG_PHYLIB
-#define CONFIG_PHY_REALTEK
-#define CONFIG_PHY_SMSC
+#define CONFIG_PHY_MICREL
 #endif
 
 #define CONFIG_IMX_THERMAL
 
-/*#ifndef CONFIG_SPL_BUILD
-#define CONFIG_VIDEO*/
+#ifndef CONFIG_SPL_BUILD
+#define CONFIG_VIDEO
 #ifdef CONFIG_VIDEO
 #define CONFIG_CFB_CONSOLE
 #define CONFIG_VIDEO_MXS
-/*#define CONFIG_VIDEO_LOGO*/
+#define CONFIG_VIDEO_LOGO
 #define CONFIG_VIDEO_SW_CURSOR
 #define CONFIG_VGA_AS_SINGLE_DEVICE
 #define CONFIG_SYS_CONSOLE_IS_IN_ENV
@@ -396,7 +363,7 @@
 #define CONFIG_VIDEO_BMP_RLE8
 #define CONFIG_VIDEO_BMP_LOGO
 #define CONFIG_IMX_VIDEO_SKIP
-/*#endif*/
+#endif
 #endif
 
 #define CONFIG_IOMUX_LPSR
